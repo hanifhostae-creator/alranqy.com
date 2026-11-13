@@ -248,6 +248,24 @@ document.addEventListener('pointerdown', e=>{
   }
 })();
 
+/* ============ Hero background photo sequence ============ */
+(function(){
+  const imgs = $$('#heroPhotos img'), sweep = $('#heroSweep'), tag = $('#heroPhotoTag');
+  if(imgs.length < 2 || reduced) return;
+  addEventListener('load', ()=>imgs.forEach(im=>im.loading = 'eager'));   // fetch the rest after the page has loaded
+  let cur = 0;
+  setInterval(()=>{
+    if(document.hidden) return;
+    const prev = imgs[cur]; cur = (cur+1) % imgs.length; const next = imgs[cur];
+    imgs.forEach(im=>{ if(im !== prev) im.classList.remove('prev'); });
+    prev.classList.remove('on'); prev.classList.add('prev');
+    next.classList.remove('prev'); void next.offsetWidth; next.classList.add('on');
+    setTimeout(()=>prev.classList.remove('prev'), 1900);
+    sweep.classList.remove('go'); void sweep.offsetWidth; sweep.classList.add('go');
+    tag.classList.add('swap'); setTimeout(()=>{ tag.textContent = next.dataset.tag; tag.classList.remove('swap'); }, 500);
+  }, 6000);
+})();
+
 /* ============ Hero word rotator ============ */
 (function(){
   const items = $$('#rotator span'); let i = 0;
