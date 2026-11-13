@@ -41,12 +41,12 @@ const CAT_ICON = {Residential:"i-home", Commercial:"i-building", Maintenance:"i-
 
 /* ============ Render ============ */
 $('#serviceGrid').innerHTML = SERVICES.map(s=>`
-  <article class="svc glow">
+  <div class="svc-cell"><article class="svc glow">
     <div class="top"><span class="ico3d ${s.tone}"><svg><use href="#${s.icon}"/></svg></span></div>
     <span class="spec">${s.spec}</span>
     <h3>${s.name}</h3><p>${s.desc}</p>
     <a href="#contact" data-need="${s.name}">Ask for a quote<svg><use href="#i-arrow"/></svg></a>
-  </article>`).join('');
+  </article></div>`).join('');
 $('#gallery').innerHTML = PROJECTS.map((p,i)=>{ const cat = p.s.split(' • ')[0]; return `
   <button type="button" class="w-card" data-cat="${p.c}" data-i="${i}" aria-label="View ${p.t}">
     <span class="w-media"><img src="${p.img}" alt="${p.t}" loading="lazy" />
@@ -274,7 +274,14 @@ document.addEventListener('pointerdown', e=>{
   function byColumn(sel, gridSel){
     const grid = $(gridSel); if(!grid) return;
     const cols = getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
-    $$(sel).forEach((el,i)=>{ const c = i % cols; const dir = cols===1 ? '' : c===0 ? 'l' : c===cols-1 ? 'r' : 'z'; mark(el, dir, Math.floor(i/cols)*120 + (dir==='z'?80:0)); });
+    $$(sel).forEach((el,i)=>{
+      const c = i % cols; let dir = cols===1 ? '' : c===0 ? 'l' : c===cols-1 ? 'r' : 'z';
+      if(grid.children.length % cols && i === grid.children.length-1) dir = 'z';   // lone last card zooms in
+      if(cols === 2 && sel === '.svc'){   // mobile / tablet: left column from left, right from right, replays on every pass
+        el.classList.add('rv','rv-'+dir); el.dataset.replay = '1'; el.style.transitionDelay = (c*90)+'ms'; return;
+      }
+      mark(el, dir, Math.floor(i/cols)*120 + (dir==='z'?80:0));
+    });
   }
   byColumn('.svc', '#serviceGrid');
   byColumn('.w-card', '#gallery');
@@ -285,11 +292,18 @@ document.addEventListener('pointerdown', e=>{
   $$('.flow > *').forEach((el,i)=>mark(el, '', i*140));
   if(!('IntersectionObserver' in window)){ $$('.rv').forEach(e=>e.classList.add('in')); return; }
   const io = new IntersectionObserver(es=>es.forEach(e=>{
-    if(!e.isIntersecting) return; const el = e.target; el.classList.add('in'); io.unobserve(el);
+    // service cards start off-screen, so their fixed wrapper cell is what gets observed
+    const el = e.target.classList.contains('svc-cell') ? e.target.firstElementChild : e.target;
+    if(el.dataset.replay){   // slide in when entering, reset once it leaves through the bottom
+      if(e.isIntersecting) el.classList.add('in');
+      else if(e.boundingClientRect.top > 0) el.classList.remove('in');
+      return;
+    }
+    if(!e.isIntersecting) return; el.classList.add('in'); io.unobserve(e.target);
     // once revealed, drop the reveal classes so hover / tilt transitions are quick again
     setTimeout(()=>{ el.classList.remove('rv','rv-l','rv-r','rv-z','in'); el.style.transitionDelay=''; }, 1800 + (parseFloat(el.style.transitionDelay)||0));
   }), {threshold:.12, rootMargin:'0px 0px -4% 0px'});
-  $$('.rv').forEach(e=>io.observe(e));
+  $$('.rv').forEach(e=>io.observe(e.closest('.svc-cell') || e));
   const cio = new IntersectionObserver(es=>es.forEach(e=>{
     if(!e.isIntersecting) return; cio.unobserve(e.target);
     const el = e.target, to = +el.dataset.to; if(reduced) return;
@@ -380,6 +394,74 @@ $$('.faq button').forEach(btn=>btn.addEventListener('click', ()=>{
   $$('.faq').forEach(f=>{ f.classList.remove('open'); f.querySelector('button').setAttribute('aria-expanded', false); });
   if(!wasOpen){ box.classList.add('open'); btn.setAttribute('aria-expanded', true); }
 }));
+
+/* ============ Chat assistant ============
+   A simple rule-based helper. Every answer comes from the information on this
+   website; anything it cannot answer is passed to a phone call or WhatsApp. */
+(function(){
+  const fab = $('#chatFab'), box = $('#chat'), log = $('#chatLog'), form = $('#chatForm'), input = $('#chatInput'), quick = $('#chatQuick');
+  if(!fab || !box) return;
+  const WA_LINK = `https://wa.me/${WA}?text=` + encodeURIComponent('Hi ALRANQQY, I need a quote for glass / aluminium work');
+  const CALL = `<a href="tel:+971521195673">052 119 5673</a> or <a href="tel:+971547144114">054 714 4114</a>`;
+  const go = id => `<a href="#${id}" data-go="${id}">`;
+  const svcList = '<ul>' + SERVICES.map(s=>`<li>${s.name}</li>`).join('') + '</ul>';
+  const KB = [
+    {k:['hi','hello','hey','salam','assalam','salaam','namaste','good morning','good evening'], a:`Hello! 👋 Welcome to <b>ALRANQQY</b> — glass & aluminium installation and maintenance in Dubai. Ask me about our services, prices, free site visit or contact details.`},
+    {k:['service','services','what do you do','offer','kaam','work do'], a:`We install and maintain glass & aluminium work for homes, offices, shops and buildings:${svcList}${go('services')}See all services →</a>`},
+    {k:['window','windows','sliding','casement','mesh','khidki'], a:`<b>Aluminium Sliding Windows</b> — 2 and 3-track sliding windows, casement windows, mosquito mesh and sound-proof options. Starting from <b>AED 275/sq.ft</b> (installation included).`},
+    {k:['door','doors','darwaza'], a:`<b>Aluminium Doors</b> — main doors, bathroom doors, sliding and casement doors with premium handles and locks. Starting from <b>AED 350/sq.ft</b>.`},
+    {k:['partition','office glass','glass wall','toughened','12mm','10mm'], a:`<b>Glass Partitions</b> — 10mm and 12mm toughened glass partitions for offices and homes, frameless or aluminium framed. 12mm toughened partition starts from <b>AED 320/sq.ft</b>.`},
+    {k:['shop','shopfront','shop front','showroom','fixed glass','patch'], a:`<b>Shop Fronts & Fixed Glass</b> — showroom and shop fronts, toughened glass doors, patch fittings and fixed glass panels. Starting from <b>AED 380/sq.ft</b>.`},
+    {k:['shower','bathroom glass','enclosure'], a:`<b>Shower Enclosures</b> — frameless toughened glass with premium stainless-steel hardware. Starting from <b>AED 450/sq.ft</b>.`},
+    {k:['railing','balcony','staircase','stair','handrail'], a:`<b>Glass Railings</b> — balcony and staircase glass railings with stainless-steel fittings. Starting from <b>AED 400/sq.ft</b>.`},
+    {k:['facade','curtain','cladding','glazing','building'], a:`<b>Facades & Curtain Walls</b> — structural glazing and aluminium facade work for commercial buildings and villas. The price depends on the design, so we quote after a free site visit.`},
+    {k:['mirror','frosted','fluted','shelf','shelves','writing board','designer'], a:`<b>Mirrors & Designer Glass</b> — designer mirrors, glass shelves, frosted and fluted glass, and glass writing boards. Ask us for a quotation.`},
+    {k:['maintenance','repair','roller','rollers','lock','handle','hinge','sealing','broken','fix','rubber','channel','theek'], a:`<b>Maintenance & Repair</b> — roller, lock, handle and hinge replacement, rubber and channel change, sealing, and glass replacement for existing aluminium and glass work. Call ${CALL}.`},
+    {k:['price','prices','cost','rate','rates','how much','kitna paisa','kitne paise','kitna kharcha','paisa','paise','estimate','budget','aed','charges'], a:`Starting rates per sq.ft (installation included):<ul><li>Sliding Window — AED 275</li><li>Door — AED 350</li><li>Glass Partition 12mm — AED 320</li><li>Shop Front / Fixed Glass — AED 380</li><li>Shower Enclosure — AED 450</li><li>Glass Railing — AED 400</li></ul>Premium Anodized +15%, Wooden / Texture finish +25%. ${go('calculator')}Try the instant estimate →</a><br><small>Final price after free site measurement.</small>`},
+    {k:['site visit','visit','measure','measurement','free','consultation','inspection'], a:`Yes — the <b>site visit, measurement and consultation are completely free</b> anywhere in Dubai. You only pay when you approve the work.`},
+    {k:['how long','time','days','duration','kab','kitne din','kitna time','kitna waqt','lagega','timeline','fast','quick'], a:`Most residential jobs are fabricated and installed within <b>7–10 days</b> of measurement. Timelines for larger commercial projects are confirmed in the quotation.`},
+    {k:['payment','pay','cash','card','bank','transfer','advance','installment'], a:`Typically an advance for materials, a second payment when fabrication is complete, and the balance after installation. <b>Bank transfer, card and cash</b> are accepted.`},
+    {k:['where','location','address','office','area','areas','kahan','dubai','sharjah','abu dhabi','serve','nahda'], a:`Our office: <b>Mai Tower, 1502, Al Nahda 1, Dubai, UAE</b>. We serve customers across Dubai.`},
+    {k:['contact','phone','number','call','whatsapp','email','mail','reach','talk'], a:`📞 ${CALL}<br>💬 <a href="${WA_LINK}" target="_blank" rel="noopener">WhatsApp us</a><br>✉️ <a href="mailto:info@alranqy.com">info@alranqy.com</a><br>📍 Mai Tower, 1502, Al Nahda 1, Dubai`},
+    {k:['quote','quotation','callback','call back','book','booking','appointment'], a:`Happy to help! Fill the ${go('contact')}callback form</a>, <a href="${WA_LINK}" target="_blank" rel="noopener">message us on WhatsApp</a>, or call ${CALL}. The site visit is free.`},
+    {k:['project','portfolio','photos','previous work','gallery'], a:`See our ${go('work')}project gallery</a> — residential windows, office partitions, shop fronts, railings, facades and shower enclosures.`},
+    {k:['review','reviews','customers','rating','trust'], a:`Our customers in Dubai rate us ★★★★★ — homeowners, offices and retail shops. ${go('reviews')}Read reviews →</a>`},
+    {k:['thank','thanks','shukriya','ok','okay','great'], a:`You're welcome! 😊 Anything else? You can also call ${CALL}.`},
+  ];
+  const QUICK = ['Services','Prices','Free site visit','How long does it take?','Payment','Location','Contact','Get a quote'];
+  quick.innerHTML = QUICK.map(q=>`<button type="button">${q}</button>`).join('');
+
+  function add(html, who){
+    const m = document.createElement('div'); m.className = 'msg ' + who;
+    if(who === 'me') m.textContent = html; else m.innerHTML = html;
+    log.appendChild(m); log.scrollTop = log.scrollHeight; return m;
+  }
+  function answer(q){
+    const t = ' ' + q.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,' ') + ' ';
+    let best = null, score = 0;
+    KB.forEach(it=>{ let s = 0; it.k.forEach(k=>{ if(t.includes(' '+k+' ') || (k.length > 4 && t.includes(k))) s += k.includes(' ') ? 2 : 1; }); if(s > score){ score = s; best = it; } });
+    return best ? best.a : `I'm not sure about that one. Our team can help directly — call ${CALL} or <a href="${WA_LINK}" target="_blank" rel="noopener">WhatsApp us</a>.`;
+  }
+  function ask(q){
+    q = q.trim(); if(!q) return;
+    add(q, 'me');
+    const typing = add('<i></i><i></i><i></i>', 'bot typing');
+    setTimeout(()=>{ typing.remove(); add(answer(q), 'bot'); }, reduced ? 50 : 650);
+  }
+  let greeted = false;
+  function open(){
+    box.hidden = false; fab.setAttribute('aria-expanded', true); fab.querySelector('.dot')?.remove();
+    if(!greeted){ greeted = true; add(`Hi! 👋 I'm the <b>ALRANQQY</b> assistant. Ask me about our glass & aluminium services, prices, free site visit, timings or contact details.`, 'bot'); }
+    setTimeout(()=>input.focus(), 250);
+  }
+  function close(){ box.hidden = true; fab.setAttribute('aria-expanded', false); fab.focus(); }
+  fab.addEventListener('click', ()=> box.hidden ? open() : close());
+  $('#chatClose').addEventListener('click', close);
+  addEventListener('keydown', e=>{ if(e.key === 'Escape' && !box.hidden) close(); });
+  form.addEventListener('submit', e=>{ e.preventDefault(); ask(input.value); input.value = ''; });
+  quick.addEventListener('click', e=>{ const b = e.target.closest('button'); if(b) ask(b.textContent); });
+  log.addEventListener('click', e=>{ const a = e.target.closest('[data-go]'); if(!a) return; e.preventDefault(); const t = document.getElementById(a.dataset.go); if(t){ t.scrollIntoView({behavior:'smooth'}); if(innerWidth < 620) close(); } });
+})();
 
 /* ============ Form -> WhatsApp ============ */
 $('#quoteForm').addEventListener('submit', e=>{
