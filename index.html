@@ -68,6 +68,12 @@ section{position:relative}
 .btn::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);transform:translateX(-120%);transition:transform .8s var(--ease)}
 .btn:hover::after{transform:translateX(120%)}
 
+/* Aluminium particle field (fixed, behind content) */
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+main .wrap,footer .wrap,.marquee{position:relative;z-index:2}
+.work,.reviews{background:rgba(16,22,31,.72)}
+footer{position:relative;background:rgba(7,10,15,.9)}
+
 /* Progress + header */
 #progress{position:fixed;top:env(safe-area-inset-top,0px);left:0;height:3px;width:0;background:var(--grad-blue);z-index:70;box-shadow:0 0 12px var(--blue)}
 header{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;transition:background .4s,border-color .4s,backdrop-filter .4s;border-bottom:1px solid transparent}
@@ -92,17 +98,25 @@ header.scrolled{background:rgba(10,14,20,.78);backdrop-filter:blur(14px) saturat
 .burger[aria-expanded="true"] span::after{transform:translateY(-6px) rotate(-45deg)}
 
 /* Hero */
-.hero{padding-block:clamp(40px,6vw,80px) clamp(64px,8vw,100px);overflow:hidden}
-.hero-bg{position:absolute;inset:0;z-index:-1;overflow:hidden}
-.hero-bg::before{content:"";position:absolute;inset:0;background:
-  radial-gradient(600px 400px at 85% 20%,rgba(47,123,255,.22),transparent 70%),
-  radial-gradient(500px 380px at 10% 90%,rgba(95,178,255,.10),transparent 70%)}
-.hero-bg .grid{position:absolute;inset:-2px;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:72px 72px;mask-image:radial-gradient(ellipse at 60% 40%,#000 20%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at 60% 40%,#000 20%,transparent 75%);animation:gridDrift 30s linear infinite}
+.hero{padding-block:clamp(14px,2.4vw,28px) clamp(56px,7vw,90px);overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:-1;overflow:hidden;background:#060a10}
+.hero-photo{position:absolute;inset:-4%;background:url("assets/img/facade-installation.jpg") center 35%/cover no-repeat;opacity:.34;filter:saturate(115%) contrast(105%);animation:kenburns 28s ease-in-out infinite alternate;will-change:transform}
+@keyframes kenburns{from{transform:scale(1.04) translate3d(0,0,0)}to{transform:scale(1.14) translate3d(-2%,-2%,0)}}
+.hero-bg::before{content:"";position:absolute;inset:0;z-index:1;background:
+  linear-gradient(90deg,rgba(6,10,16,.97) 0%,rgba(6,10,16,.86) 38%,rgba(6,10,16,.55) 70%,rgba(6,10,16,.78) 100%),
+  linear-gradient(180deg,rgba(6,10,16,.4) 0%,transparent 30%,transparent 70%,var(--bg) 100%)}
+.hero-bg::after{content:"";position:absolute;inset:0;z-index:1;background:
+  radial-gradient(620px 420px at 80% 18%,rgba(47,123,255,.28),transparent 70%),
+  radial-gradient(520px 380px at 6% 92%,rgba(95,178,255,.12),transparent 70%)}
+.hero-bg .grid{position:absolute;inset:-2px;z-index:2;background-image:linear-gradient(rgba(150,190,240,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(150,190,240,.07) 1px,transparent 1px);background-size:72px 72px;mask-image:radial-gradient(ellipse at 60% 40%,#000 20%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at 60% 40%,#000 20%,transparent 75%);animation:gridDrift 30s linear infinite}
 @keyframes gridDrift{to{background-position:72px 72px,72px 72px}}
-.hero-bg .streak{position:absolute;height:1px;width:240px;background:linear-gradient(90deg,transparent,rgba(95,178,255,.8),transparent);animation:streak 7s linear infinite;opacity:.7}
+.hero-bg .streak{position:absolute;z-index:2;height:1px;width:240px;background:linear-gradient(90deg,transparent,rgba(95,178,255,.8),transparent);animation:streak 7s linear infinite;opacity:.7}
 @keyframes streak{from{transform:translateX(-30vw)}to{transform:translateX(130vw)}}
-.hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:clamp(32px,5vw,64px);align-items:center}
-.hero-copy{display:grid;gap:1.5rem;min-width:0}
+.hero-grid{display:grid;grid-template-columns:1.05fr 1fr;grid-template-areas:"eye visual" "head visual" "body visual";grid-template-rows:auto auto 1fr;column-gap:clamp(32px,5vw,64px);row-gap:1.25rem;align-items:start}
+.hero-eye{grid-area:eye;min-width:0}
+.hero-head{grid-area:head;min-width:0}
+.hero-body{grid-area:body;display:grid;gap:1.5rem;align-content:start;min-width:0}
+.hero .visual{grid-area:visual;align-self:start;margin-top:.4rem}
 .hero h1{font-size:clamp(2.4rem,5.6vw,4.4rem);font-weight:800}
 .hero h1 .line{display:block;overflow:hidden;padding-bottom:.06em}
 .hero h1 .line>span{display:inline-block;animation:rise 1s var(--ease) both}
@@ -125,7 +139,7 @@ ul{list-style:none;margin:0;padding:0}
 
 /* Animated sliding window */
 .visual{position:relative;min-width:0;animation:fadeUp 1.1s .2s var(--ease) both}
-.win{position:relative;aspect-ratio:5/4;max-width:100%;border-radius:10px;padding:14px;background:var(--grad-silver);box-shadow:0 40px 80px -30px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.25) inset,0 0 60px -10px rgba(47,123,255,.35)}
+.win{position:relative;transform:perspective(1200px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .6s var(--ease);aspect-ratio:5/4;max-width:100%;border-radius:10px;padding:14px;background:var(--grad-silver);box-shadow:0 40px 80px -30px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.25) inset,0 0 60px -10px rgba(47,123,255,.35)}
 .win-view{position:relative;height:100%;border-radius:4px;overflow:hidden;background:#0d1622;box-shadow:inset 0 0 0 2px #6e7a88}
 .slides img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.12);transition:opacity 1.2s ease,transform 6s linear}
 .slides img.on{opacity:1;transform:scale(1)}
@@ -339,7 +353,7 @@ textarea{min-height:110px;resize:vertical}
 .toast a{text-decoration:underline}
 
 /* Footer */
-footer{border-top:1px solid var(--line);background:#070a0f;padding-block:64px 28px}
+footer{border-top:1px solid var(--line);padding-block:64px 28px}
 .f-grid{display:grid;grid-template-columns:1.4fr 1fr 1.2fr;gap:40px}
 .f-grid h4{font:600 .74rem/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 1.1rem}
 .f-logo{width:200px;border-radius:12px;margin-bottom:1rem}
@@ -368,8 +382,10 @@ footer{border-top:1px solid var(--line);background:#070a0f;padding-block:64px 28
   .menu a::after{display:none}
   .burger{display:grid}
   .nav-cta{display:none}
-  .hero-grid,.about-grid,.est,.rev-wrap,.faq-wrap,.contact-grid{grid-template-columns:1fr}
-  .visual{max-width:560px;width:100%;margin:0 auto}
+  .about-grid,.est,.rev-wrap,.faq-wrap,.contact-grid{grid-template-columns:1fr}
+  .hero-grid{grid-template-columns:1.1fr .9fr;grid-template-areas:"eye eye" "head visual" "body body";grid-template-rows:auto auto auto;column-gap:clamp(14px,3vw,32px)}
+  .hero h1{font-size:clamp(1.3rem,5.4vw,3rem)}
+  .hero .visual{align-self:center;margin-top:0}
   .svc-grid{grid-template-columns:repeat(2,1fr)}
   .gallery{grid-template-columns:repeat(2,1fr);grid-auto-rows:200px}
   .steps{grid-template-columns:repeat(2,1fr);row-gap:36px}
@@ -383,10 +399,16 @@ footer{border-top:1px solid var(--line);background:#070a0f;padding-block:64px 28
   .gallery{grid-template-columns:1fr 1fr;grid-auto-rows:150px;gap:10px}
   .g-item.wide{grid-column:span 2}
   .seg{grid-template-columns:1fr}
-  .win-tag.a{left:-6px;bottom:8%}
-  .win-tag.b{right:-6px;top:4%}
-  .win-tag{padding:.55rem .75rem}
-  .win-tag .ic{width:30px;height:30px}
+  .hero h1{font-size:clamp(1.12rem,5.6vw,1.6rem);letter-spacing:-.01em}
+  .hero-eye .eyebrow{font-size:.62rem;letter-spacing:.12em}
+  .win{aspect-ratio:3/4;padding:7px;border-radius:7px}
+  .track{height:5px}.sash{top:5px;bottom:5px;border-width:5px}
+  .sash.move::after{width:4px;height:26px;margin-top:-13px;left:3px}
+  .win-tag{display:none}
+  .win-caption{font-size:.56rem;margin-top:.5rem;letter-spacing:.03em}
+  .win-caption span{display:none}
+  .win-caption .dots{margin:0 auto}
+  .hero-lead{font-size:1rem}
   .about-visual figure:first-child{margin-top:28px}
   .addr-badge{right:8px;bottom:-26px}
   .f-grid{grid-template-columns:1fr}
@@ -429,6 +451,7 @@ footer{border-top:1px solid var(--line);background:#070a0f;padding-block:64px 28
   </defs>
 </svg>
 
+<canvas id="fx" aria-hidden="true"></canvas>
 <div id="progress" aria-hidden="true"></div>
 
 <header id="header">
@@ -455,19 +478,22 @@ footer{border-top:1px solid var(--line);background:#070a0f;padding-block:64px 28
 <!-- HERO -->
 <section class="hero" id="top">
   <div class="hero-bg" aria-hidden="true">
+    <div class="hero-photo"></div>
     <div class="grid"></div>
     <div class="streak" style="top:22%"></div>
     <div class="streak" style="top:58%;animation-delay:-3s;animation-duration:9s"></div>
     <div class="streak" style="top:84%;animation-delay:-5s"></div>
   </div>
   <div class="wrap hero-grid">
-    <div class="hero-copy">
-      <span class="eyebrow">Glass • Aluminium • Installation • Maintenance — Dubai, UAE</span>
+    <div class="hero-eye"><span class="eyebrow">Glass • Aluminium • Installation • Maintenance — Dubai, UAE</span></div>
+    <div class="hero-head">
       <h1>
         <span class="line"><span class="silver-text">Glass &amp; Aluminium</span></span>
         <span class="line"><span>Installation &amp; Maintenance</span></span>
         <span class="line"><span>for <span class="rotator" id="rotator"><span class="on">Homes</span><span>Offices</span><span>Shops</span><span>Buildings</span></span></span></span>
       </h1>
+    </div>
+    <div class="hero-body">
       <p class="hero-lead"><strong>ALRANQQY</strong> installs and maintains aluminium windows and doors, glass partitions, shop fronts, facades and shower enclosures across Dubai — measured on site, fabricated to fit, and finished clean.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="tel:+971521195673"><svg><use href="#i-phone"/></svg>Call 052 119 5673</a>
@@ -825,6 +851,142 @@ addEventListener('scroll', onScroll, {passive:true}); onScroll();
 const burger = $('#burger'), menu = $('#menu');
 burger.addEventListener('click', ()=>{ const o = menu.classList.toggle('open'); burger.setAttribute('aria-expanded', o); });
 links.forEach(a=>a.addEventListener('click', ()=>{ menu.classList.remove('open'); burger.setAttribute('aria-expanded', false); }));
+
+/* ============ Aluminium particle field ============
+   Window frames, aluminium profile sections (U, L, I, T, box, 2-track),
+   glass panes and screws drift across the page. Each one "builds" itself
+   line by line, holds, fades and is rebuilt elsewhere. Nearby pieces are
+   linked by blueprint lines; the cursor pulls in links and pushes pieces. */
+(function(){
+  const cv = $('#fx'); if(!cv || !cv.getContext) return;
+  const ctx = cv.getContext('2d');
+  const R = (a,b)=>a+Math.random()*(b-a);
+  const rect = (x,y,w,h)=>({pts:[[x,y],[x+w,y],[x+w,y+h],[x,y+h]],closed:true});
+  const line = (x1,y1,x2,y2)=>({pts:[[x1,y1],[x2,y2]],closed:false});
+  const poly = pts=>({pts,closed:true});
+  const SHAPES = {
+    window:[rect(-.5,-.4,1,.8),rect(-.42,-.32,.84,.64),line(0,-.32,0,.32),line(-.07,-.06,-.07,.06),line(.07,-.06,.07,.06)],
+    slider:[rect(-.5,-.24,1,.48),line(-.5,-.08,.5,-.08),line(-.5,.08,.5,.08),line(-.1,-.24,-.1,-.08),line(.1,.08,.1,.24)],
+    u:[poly([[-.4,-.4],[-.4,.4],[.4,.4],[.4,-.4],[.3,-.4],[.3,.3],[-.3,.3],[-.3,-.4]])],
+    l:[poly([[-.4,-.4],[-.4,.4],[.4,.4],[.4,.3],[-.3,.3],[-.3,-.4]])],
+    i:[poly([[-.4,-.45],[.4,-.45],[.4,-.35],[.07,-.35],[.07,.35],[.4,.35],[.4,.45],[-.4,.45],[-.4,.35],[-.07,.35],[-.07,-.35],[-.4,-.35]])],
+    t:[poly([[-.45,-.4],[.45,-.4],[.45,-.3],[.06,-.3],[.06,.45],[-.06,.45],[-.06,-.3],[-.45,-.3]])],
+    box:[rect(-.4,-.4,.8,.8),rect(-.3,-.3,.6,.6)],
+    pane:[rect(-.4,-.5,.8,1),line(-.25,-.2,0,-.42),line(-.25,.05,.18,-.38)],
+    screw:[]
+  };
+  for(const k in SHAPES){ SHAPES[k].len = SHAPES[k].reduce((L,p)=>{ let l=0; const n=p.pts.length;
+    for(let i=1;i<n+(p.closed?1:0);i++){ const a=p.pts[i-1], b=p.pts[i%n]; l+=Math.hypot(b[0]-a[0],b[1]-a[1]); } return L+l; },0); }
+  const BAG = ['window','window','window','slider','slider','u','u','l','l','i','i','t','box','box','pane','pane','pane','screw','screw','spark','spark','spark','spark'];
+  let W=0, H=0, dpr=1, parts=[], raf=null, last=0, mouse={x:-9999,y:-9999,on:false}, sy=scrollY;
+
+  function spawn(p, initial){
+    p.type = BAG[(Math.random()*BAG.length)|0];
+    p.z = R(.45,1);
+    p.s = (p.type==='spark'? R(1,2.4) : p.type==='screw'? R(5,8) : R(16,36)) * (0.6+p.z*0.5);
+    p.x = R(0,W); p.y = R(0,H);
+    const sp = .12 + p.z*.22;
+    p.vx = R(-sp,sp); p.vy = R(-sp*1.2,sp*.4);
+    p.rot = R(0,Math.PI*2); p.vr = R(-.004,.004);
+    p.build = p.type==='spark'||p.type==='screw' ? 0 : R(1.6,3.2);   // seconds to draw itself
+    p.hold = R(7,15); p.fade = R(1.2,2.2);
+    p.age = initial ? R(0,p.build+p.hold) : 0;
+    p.blue = Math.random() < .35;
+    return p;
+  }
+  function size(){
+    dpr = Math.min(devicePixelRatio||1, 2);
+    W = innerWidth; H = innerHeight;
+    cv.width = W*dpr; cv.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+    const n = Math.round(Math.min(90, Math.max(26, W*H/15000)));
+    while(parts.length < n) parts.push(spawn({}, true));
+    parts.length = n;
+  }
+  function lifeAlpha(p){
+    const t = p.age, end = p.build+p.hold;
+    if(t < p.build) return Math.min(1, t/p.build*2.2);
+    if(t < end) return 1;
+    return Math.max(0, 1-(t-end)/p.fade);
+  }
+  function drawPart(p, a){
+    const s = p.s;
+    ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+    if(p.type==='spark'){
+      const tw = .55+.45*Math.sin(p.age*3+p.x);
+      ctx.fillStyle = `rgba(150,205,255,${.7*a*tw})`;
+      ctx.beginPath(); ctx.arc(0,0,s,0,Math.PI*2); ctx.fill();
+      ctx.restore(); return;
+    }
+    const col = p.blue ? `rgba(95,178,255,${.55*a*p.z})` : `rgba(205,218,232,${.42*a*p.z})`;
+    ctx.lineWidth = p.type==='screw' ? 1.1 : 1.2; ctx.strokeStyle = col; ctx.lineJoin='round'; ctx.lineCap='round';
+    if(p.type==='screw'){
+      ctx.beginPath(); ctx.arc(0,0,s/2,0,Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-s*.28,0); ctx.lineTo(s*.28,0); ctx.moveTo(0,-s*.28); ctx.lineTo(0,s*.28); ctx.stroke();
+      ctx.restore(); return;
+    }
+    const sh = SHAPES[p.type];
+    if(p.type==='pane'){
+      const g = ctx.createLinearGradient(-s*.4,-s*.5,s*.4,s*.5);
+      g.addColorStop(0,`rgba(95,178,255,${.16*a*p.z})`); g.addColorStop(1,`rgba(47,123,255,${.04*a*p.z})`);
+      ctx.fillStyle = g; ctx.fillRect(-s*.4,-s*.5,s*.8,s);
+    }
+    const prog = p.build ? Math.min(1, p.age/p.build) : 1;
+    const L = sh.len*s;
+    if(prog < 1){ ctx.setLineDash([L*prog, L]); }
+    ctx.beginPath();
+    sh.forEach(seg=>{ seg.pts.forEach((pt,i)=> i ? ctx.lineTo(pt[0]*s,pt[1]*s) : ctx.moveTo(pt[0]*s,pt[1]*s)); if(seg.closed) ctx.closePath(); });
+    ctx.stroke();
+    if(prog < 1){ // glowing "cutting head" at the tip of the line being drawn
+      ctx.setLineDash([]);
+      ctx.fillStyle = `rgba(140,200,255,${.9*a})`; ctx.shadowColor='#5fb2ff'; ctx.shadowBlur=8;
+      const ang = prog*Math.PI*2; ctx.beginPath(); ctx.arc(Math.cos(ang)*s*.45, Math.sin(ang)*s*.4, 1.6, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.restore();
+  }
+  function frame(t){
+    const dt = Math.min(.05, (t-(last||t))/1000); last = t;
+    const ds = scrollY - sy; sy = scrollY;
+    ctx.clearRect(0,0,W,H);
+    // update
+    for(const p of parts){
+      p.age += dt;
+      if(p.age > p.build+p.hold+p.fade){ spawn(p,false); continue; }
+      p.x += p.vx*dt*60; p.y += p.vy*dt*60 - ds*(p.z-.3)*.35; p.rot += p.vr*dt*60;
+      if(mouse.on){ const dx=p.x-mouse.x, dy=p.y-mouse.y, d=Math.hypot(dx,dy); if(d<140 && d>0){ const f=(140-d)/140*.9; p.x+=dx/d*f; p.y+=dy/d*f; } }
+      const m = 60; if(p.x<-m) p.x=W+m; else if(p.x>W+m) p.x=-m; if(p.y<-m) p.y=H+m; else if(p.y>H+m) p.y=-m;
+      p.a = lifeAlpha(p);
+    }
+    // blueprint links
+    ctx.lineWidth = 1;
+    for(let i=0;i<parts.length;i++){ const a=parts[i]; if(a.type==='spark') continue;
+      for(let j=i+1;j<parts.length;j++){ const b=parts[j]; if(b.type==='spark') continue;
+        const dx=a.x-b.x, dy=a.y-b.y, d2=dx*dx+dy*dy; if(d2 > 150*150) continue;
+        const al = (1-Math.sqrt(d2)/150)*.16*Math.min(a.a,b.a);
+        ctx.strokeStyle=`rgba(95,178,255,${al})`; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); } }
+    if(mouse.on){ for(const p of parts){ const d=Math.hypot(p.x-mouse.x,p.y-mouse.y); if(d<210){
+      ctx.strokeStyle=`rgba(120,190,255,${(1-d/210)*.35*p.a})`; ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(mouse.x,mouse.y); ctx.stroke(); } } }
+    for(const p of parts) drawPart(p, p.a);
+    raf = requestAnimationFrame(frame);
+  }
+  function start(){ if(!raf){ last=0; raf=requestAnimationFrame(frame); } }
+  function stop(){ if(raf){ cancelAnimationFrame(raf); raf=null; } }
+  size();
+  addEventListener('resize', size);
+  addEventListener('pointermove', e=>{ if(e.pointerType==='mouse'){ mouse.x=e.clientX; mouse.y=e.clientY; mouse.on=true; } }, {passive:true});
+  document.addEventListener('pointerleave', ()=>{ mouse.on=false; });
+  document.addEventListener('visibilitychange', ()=> document.hidden ? stop() : (reduced ? null : start()));
+  if(reduced){ parts.forEach(p=>{ p.age=p.build+1; p.a=1; drawPart(p,1); }); }
+  else start();
+})();
+
+/* ============ Window tilt follows the cursor ============ */
+(function(){
+  const win = $('.win'), vis = $('.visual'); if(!win || reduced || !matchMedia('(hover:hover)').matches) return;
+  vis.addEventListener('pointermove', e=>{ const r=vis.getBoundingClientRect();
+    win.style.setProperty('--ry', ((e.clientX-r.left)/r.width-.5)*8+'deg');
+    win.style.setProperty('--rx', -((e.clientY-r.top)/r.height-.5)*6+'deg'); });
+  vis.addEventListener('pointerleave', ()=>{ win.style.setProperty('--rx','0deg'); win.style.setProperty('--ry','0deg'); });
+})();
 
 /* ============ Hero word rotator ============ */
 (function(){
