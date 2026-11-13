@@ -40,13 +40,21 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CAT_ICON = {Residential:"i-home", Commercial:"i-building", Maintenance:"i-wrench"};
 
 /* ============ Render ============ */
-$('#serviceGrid').innerHTML = SERVICES.map(s=>`
-  <div class="svc-cell"><article class="svc glow">
+const svcCard = (s, tab) => `<article class="svc glow">
     <div class="top"><span class="ico3d ${s.tone}"><svg><use href="#${s.icon}"/></svg></span></div>
     <span class="spec">${s.spec}</span>
     <h3>${s.name}</h3><p>${s.desc}</p>
-    <a href="#contact" data-need="${s.name}">Ask for a quote<svg><use href="#i-arrow"/></svg></a>
-  </article></div>`).join('');
+    <a href="#contact" data-need="${s.name}"${tab ? '' : ' tabindex="-1"'}>Ask for a quote<svg><use href="#i-arrow"/></svg></a>
+  </article>`;
+$('#serviceGrid').innerHTML = SERVICES.map(s=>`<div class="svc-cell">${svcCard(s, true)}</div>`).join('');
+/* Mobile: two endless rows — the top row slides left, the bottom row slides right.
+   Cards are doubled so the loop is seamless; screen readers use the grid above instead. */
+(function(){
+  const half = Math.ceil(SERVICES.length/2), rows = [SERVICES.slice(0, half), SERVICES.slice(half)];
+  const box = document.createElement('div'); box.className = 'svc-rows'; box.setAttribute('aria-hidden','true');
+  box.innerHTML = rows.map((r,i)=>`<div class="svc-row ${i ? 'r' : 'l'}"><div class="svc-track">${[...r, ...r].map(s=>svcCard(s, false)).join('')}</div></div>`).join('');
+  $('#serviceGrid').after(box);
+})();
 $('#gallery').innerHTML = PROJECTS.map((p,i)=>{ const cat = p.s.split(' • ')[0]; return `
   <button type="button" class="w-card" data-cat="${p.c}" data-i="${i}" aria-label="View ${p.t}">
     <span class="w-media"><img src="${p.img}" alt="${p.t}" loading="lazy" />
@@ -295,13 +303,14 @@ document.addEventListener('pointerdown', e=>{
     $$(sel).forEach((el,i)=>{
       const c = i % cols; let dir = cols===1 ? '' : c===0 ? 'l' : c===cols-1 ? 'r' : 'z';
       if(grid.children.length % cols && i === grid.children.length-1) dir = 'z';   // lone last card zooms in
-      if(cols === 2 && sel === '.svc'){   // mobile / tablet: left column from left, right from right, replays on every pass
+      if(cols === 2 && sel === '#serviceGrid .svc'){   // mobile / tablet: left column from left, right from right, replays on every pass
         el.classList.add('rv','rv-'+dir); el.dataset.replay = '1'; el.style.transitionDelay = (c*90)+'ms'; return;
       }
       mark(el, dir, Math.floor(i/cols)*120 + (dir==='z'?80:0));
     });
   }
-  byColumn('.svc', '#serviceGrid');
+  byColumn('#serviceGrid .svc', '#serviceGrid');
+  $$('.svc-row').forEach((el,i)=>mark(el, i ? 'r' : 'l', i*150));
   byColumn('.w-card', '#gallery');
   $$('.sec-head, .about-copy > *, .rev-score, .rev-slider, .faq, .cta-band, .c-card, form.quote, .f-grid > div').forEach(el=>mark(el));
   $$('.feat li').forEach((el,i)=>mark(el, i%2?'r':'l', i*90));

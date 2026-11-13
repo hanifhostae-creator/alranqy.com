@@ -630,3 +630,46 @@ footer{position:relative;border-top:1px solid var(--line);background:linear-grad
 .chat-f button{width:44px;height:44px;border-radius:12px;border:0;background:var(--grad-blue);cursor:pointer;display:grid;place-items:center;flex:none}
 .chat-f button svg{width:18px;height:18px;color:#fff}
 @media (max-width:620px){.chat-fab .tip{display:none}}
+
+/* ---------- Mobile services: two endless sliding rows ---------- */
+.svc-rows{display:none}
+@media (max-width:620px){
+  #serviceGrid{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+  .svc-rows{display:grid;gap:14px;margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)))}
+  .svc-row{overflow:hidden;padding-block:6px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
+  .svc-row.rv-l{transform:translateX(-45%)}
+  .svc-row.rv-r{transform:translateX(45%)}
+  .svc-row.rv{transition:opacity .9s var(--ease),transform 1.1s cubic-bezier(.16,1,.3,1)}
+  .svc-track{display:flex;align-items:stretch;width:max-content;animation:svcL 34s linear infinite}
+  .svc-row.r .svc-track{animation-name:svcR;animation-duration:30s}
+  .svc-row:hover .svc-track,.svc-row:active .svc-track{animation-play-state:paused}
+  .svc-track .svc{flex:none;width:236px;margin-right:12px;padding:1.1rem 1rem}
+  .svc-track .svc .ico3d{--s:42px}
+  .svc-track .svc h3{font-size:.98rem}
+  .svc-track .svc p{font-size:.8rem}
+  .svc-track .svc .spec{font-size:.58rem}
+  .svc-track .svc a{font-size:.8rem}
+}
+@keyframes svcL{to{transform:translateX(-50%)}}
+@keyframes svcR{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+
+/* ---------- Footer: building photo + statement band ---------- */
+footer{overflow:hidden;isolation:isolate;padding-top:0}
+.f-bg{position:absolute;inset:0;z-index:-1}
+.f-bg img{width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:.62;filter:saturate(115%);animation:kenburns 30s ease-in-out infinite alternate}
+.f-bg::after{content:"";position:absolute;inset:0;background:
+  linear-gradient(90deg,rgba(13,20,32,.88) 0%,rgba(13,20,32,.55) 55%,rgba(13,20,32,.35) 100%),
+  linear-gradient(180deg,var(--bg) 0%,rgba(19,28,42,.45) 16%,rgba(13,20,32,.62) 50%,rgba(9,14,22,.95) 100%),
+  radial-gradient(600px 300px at 85% 10%,rgba(47,123,255,.22),transparent 70%)}
+.f-hero{display:grid;grid-template-columns:1.5fr auto;gap:2rem;align-items:end;padding-block:clamp(56px,8vw,96px) clamp(36px,5vw,52px);margin-bottom:clamp(36px,5vw,52px);border-bottom:1px solid var(--line-2)}
+.f-hero-copy{display:grid;gap:.9rem;max-width:720px;min-width:0}
+.f-hero h2{font-size:clamp(1.6rem,3.4vw,2.6rem)}
+.f-hero p{color:var(--silver);max-width:60ch}
+.f-hero-acts{display:flex;flex-wrap:wrap;gap:.7rem}
+.f-bottom{align-items:center}
+.to-top{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:rgba(47,123,255,.15);border:1px solid rgba(98,180,255,.3);transition:background .3s,transform .3s var(--ease)}
+.to-top svg{width:18px;height:18px;color:var(--blue-2);transform:rotate(-90deg)}
+.to-top:hover{background:var(--blue);transform:translateY(-3px)}
+.to-top:hover svg{color:#fff}
+@media (max-width:860px){.f-hero{grid-template-columns:1fr;align-items:start}}
+@media (max-width:620px){.f-hero-acts .btn{flex:1 1 0;min-width:0;padding:.75rem .5rem;font-size:.82rem}.f-tag{order:3;width:100%}}
